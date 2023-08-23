@@ -8,8 +8,6 @@ import User from "../models/User.js"
 // register user
 export const register = async (req, res) => {
 	const { username, password, email } = req.body
-	// const userInfo = await User.create( { username, password, email } )
-	console.log(req.body)
 	try {
 		if (!email || !username || !password) {
 	        res.status(400)
@@ -35,11 +33,11 @@ export const register = async (req, res) => {
 	    // generateToken(registeredUser._id, username)
 	    jwt.sign({ userId: registeredUser._id }, process.env.JWT_SECRET, {}, (err, token) => {
 	    	if (err) throw new Error("No token found") 
-    		return res.cookie("token", token).status(201).json({
+    		    res.cookie('token', token).status(201).json({
     			_id: registeredUser._id
     		})
 	    })
-	    return res.status(200).json({ data: registeredUser })
+	    // return res.status(200).json({ data: registeredUser })
 	} catch (error) {
 		if (error) throw new Error("Something went wrong")
 	}
