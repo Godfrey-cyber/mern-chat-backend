@@ -2,6 +2,8 @@ import express from "express"
 import dotenv from 'dotenv'
 import mongoose from "mongoose"
 import cookieParser from "cookie-parser"
+import { WebSocketServer } from "ws"
+import jwt from "jsonwebtoken"
 import cors from "cors"
 import userRoutes from "./routes/user.js"
 
@@ -18,14 +20,39 @@ app.use(cors({
 const MONGO_URL = process.env.CONNECTION_URL
 const PORT = process.env.PORT || 8080
 
-mongoose.connect(MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true}).then(() => app.listen(PORT, () => console.log(`Success! Database running on port: ${PORT}`))).catch(error => console.log(error))
+const server = mongoose.connect(MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true}).then(() => app.listen(PORT, () => console.log(`Success 💯! Database running on port: ${PORT} 👍`))).catch(error => console.log(error))
 
-mongoose.connection.on("disconnected", () => {
-    console.log("MongoDatabase disconnected")
-})
+mongoose.connection.on("disconnected", (error) => {
+    console.log("MongoDatabase disconnected", error)
+});
 
 
 app.use('/', userRoutes) 
 
-// app.listen(process.env.PORT)
+// const wss = new ws.WebSocket.Server({server});
+// wss.on("connection", (connection) => {
+// 	console.lg("Connected :-D")
+// })
 
+// const wss = new ws({server})
+const wss = new WebSocketServer({ port: 8080 });
+wss.on("connection", (connection, req) => {
+	const cookies = req.headers.cookie
+	if (cookies) {
+		const splitToken = cookies.split(';').find(str => str.startsWith("token="))
+		if (splitToken) {
+			const token = splitToken.split("=")[1]
+			if (token) {
+				jwt.verify(token, process.env.JWT_SECRET, {}, (error, data) => {
+					if (error) throw error
+					const { userId, username } = data
+				console.log(data)
+					connection.userId = userId
+					connection.username = username
+				})
+			}
+		}
+	}
+console.log([...wss.clients].map(client => client.username))	
+})
+// console.log(wss)

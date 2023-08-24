@@ -30,7 +30,7 @@ export const register = async (req, res) => {
     // generateToken(registeredUser._id, username)
     try {
     	const registeredUser = await User.create({ username, password, email });
-	    jwt.sign({ userId: registeredUser._id, username }, process.env.JWT_SECRET, {}, (err, token) => {
+	    jwt.sign({ userId: registeredUser._id, username: userExists.username }, process.env.JWT_SECRET, {}, (err, token) => {
 	    	if (err) {
 	    		console.log(err)
 	    	} 
@@ -42,7 +42,7 @@ export const register = async (req, res) => {
 	            secure: true
        		}).status(201).json({
     			_id: registeredUser._id,
-    			username
+    			username: userExists.username
     		})
 	    })
 	} catch (error) {
