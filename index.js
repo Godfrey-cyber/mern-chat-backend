@@ -47,12 +47,16 @@ wss.on("connection", (connection, req) => {
 					if (error) throw error
 					const { userId, username } = data
 				console.log(data)
-					connection.userId = userId
-					connection.username = username
+					connection.userId = userId;
+					connection.username = username;
 				})
 			}
 		}
 	}
-console.log([...wss.clients].map(client => client.username))	
+[...wss.clients].forEach(client => {
+	client.send(JSON.stringify	({
+			online: [...wss.clients].map(c => ({ userId: c.userId, username: c.username}))
+		}))
+	})	
 })
 // console.log(wss)
