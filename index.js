@@ -2,7 +2,7 @@ import express from "express"
 import dotenv from 'dotenv'
 import mongoose from "mongoose"
 import cookieParser from "cookie-parser"
-import { WebSocketServer } from "ws"
+import WebSOcket, { WebSocketServer } from "ws"
 import jwt from "jsonwebtoken"
 import cors from "cors"
 import userRoutes from "./routes/user.js"
@@ -35,6 +35,9 @@ app.use('/', userRoutes)
 // })
 
 // const wss = new ws({server})
+
+// const wss = new WebSocketServer({ port: 8080 });
+
 const wss = new WebSocketServer({ port: 8080 });
 wss.on("connection", (connection, req) => {
 	const cookies = req.headers.cookie
@@ -46,17 +49,29 @@ wss.on("connection", (connection, req) => {
 				jwt.verify(token, process.env.JWT_SECRET, {}, (error, data) => {
 					if (error) throw error
 					const { userId, username } = data
-				console.log(data)
+					console.log(data)
 					connection.userId = userId;
 					connection.username = username;
 				})
 			}
 		}
 	}
-[...wss.clients].forEach(client => {
-	client.send(JSON.stringify	({
+
+connection.on('message', (message, isBinary) => {
+		const messageData = JSON.parse(message.toString())
+		const { recipient, text } = messageData
+		console.log(messageData)
+		if (recipient && messageData) {
+			[...wss.clients].filter(c => c.userId === recipient).forEach(c => c.send(JSON.stringify({ text })))
+		}
+		// connection.send(messageData, { binary: isBinary })
+	})
+
+wss.clients.forEach(client => {
+	client.send(JSON.stringify({
 			online: [...wss.clients].map(c => ({ userId: c.userId, username: c.username}))
 		}))
 	})	
+
 })
 // console.log(wss)

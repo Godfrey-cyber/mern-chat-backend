@@ -74,6 +74,7 @@ export const userprofile = async (req, res) => {
     			console.log(err)
     		} 
 			res.status(200).json(data)
+			console.log(data)
     	})
     } else {
     	res.status(401).json("Token is invalid or does not exist!")
