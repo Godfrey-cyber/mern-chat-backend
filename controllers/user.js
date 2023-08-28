@@ -65,6 +65,18 @@ export const getUsers = async (req, res) => {
 	}
 }
 
+export const getUser = async (req, res) => {
+	try {
+		const user = await User.find(req.params.id);
+  		res.status(200).json(user);
+	} catch(error) {
+		if (error) {
+			res.status(401).json(error)
+		}
+	}
+  	
+};
+
 // get user profile 
 export const userprofile = async (req, res) => {
 	const {token} = req.cookies;
